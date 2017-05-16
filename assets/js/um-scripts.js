@@ -190,26 +190,70 @@ jQuery(document).ready(function() {
 		minimumResultsForSearch: 10
 	});
 
-	jQuery(document).on('click', '.um-field-group-head:not(.disabled)', function(){
+	/* Disable initial field group button if already at max */
+    jQuery('.um-field-group').each(function(){
+        var field = jQuery(this),
+            limit = field.data('max_entries');
+        if ( limit > 0 && field.find('.um-field-group-body').length >= limit ) {
+            field.find('.um-field-group-head').addClass('disabled');
+        }
+        increase_id = 0;
+        field.find('.um-field-group-body').each(function(){
+            increase_id++;
+            jQuery(this).find('input, textarea, select').each(function(){
+                var input = jQuery(this);
+                var key = input.closest(".um-field").data('key');
+                input.attr('id', key + '-' + increase_id );
+                input.attr('name', key + '-' + increase_id );
+                input.parent().parent().find('label').attr('for', key + '-' + increase_id );
+                input.parent().find('.um-single-image-preview, .um-modal-hidden-content .um-modal-btn').each(function(){
+                    var _self = jQuery(this);
+                    _self.attr('data-key', key + '-' + increase_id);
+                    _self.data('key', key + '-' + increase_id);
+                });
+            });
+        });
+    });
+
+    jQuery(document).on('click', '.um-field-group-head:not(.disabled)', function(){
 		var field = jQuery(this).parents('.um-field-group');
 		var limit = field.data('max_entries');
 
 		if ( field.find('.um-field-group-body').is(':hidden')){
 			field.find('.um-field-group-body').show();
-		} else {
-			field.find('.um-field-group-body:first').clone().appendTo( field );
-		}
+        } else {
+            var newGroup = field.find('.um-field-group-body:first').clone(false)
+                .appendTo( field.find(".um-field-group-body-container") );
+            newGroup.find("input, textarea, select").val("");
+            newGroup.find('.um-field-image').each(function(){
+                var _self = jQuery(this);
+                var src = _self.find('.um-single-image-preview img').attr('src');
+                jQuery('img.cropper-hidden').cropper('destroy');
+                _self.find('.um-single-image-preview img').attr('src', '');
+                _self.find('.um-single-image-preview').hide();
+                _self.find('.ajax-upload-dragdrop').show();
+                _self.find('.um-modal-btn.um-finish-upload').addClass('disabled');
+                _self.find('.um-btn-auto-width').html('Upload');
+                um_modal_responsive();
+            });
+        }
 
-		increase_id = 0;
-		field.find('.um-field-group-body').each(function(){
-			increase_id++;
-			jQuery(this).find('input').each(function(){
-				var input = jQuery(this);
-				input.attr('id', input.data('key') + '-' + increase_id );
-				input.attr('name', input.data('key') + '-' + increase_id );
-				input.parent().parent().find('label').attr('for', input.data('key') + '-' + increase_id );
-			});
-		});
+        increase_id = 0;
+        field.find('.um-field-group-body').each(function(){
+            increase_id++;
+            jQuery(this).find('input, textarea, select').each(function(){
+                var input = jQuery(this);
+                var key = input.closest(".um-field").data('key');
+                input.attr('id', key + '-' + increase_id );
+                input.attr('name', key + '-' + increase_id );
+                input.parent().parent().find('label').attr('for', key + '-' + increase_id );
+                input.parent().find('.um-single-image-preview, .um-modal-hidden-content .um-modal-btn').each(function(){
+                    var _self = jQuery(this);
+                    _self.attr('data-key', key + '-' + increase_id);
+                    _self.data('key', key + '-' + increase_id);
+                });
+            });
+        });
 
 		if ( limit > 0 && field.find('.um-field-group-body').length == limit ) {
 
@@ -222,13 +266,34 @@ jQuery(document).ready(function() {
 		e.preventDefault();
 		var field = jQuery(this).parents('.um-field-group');
 
-		var limit = field.data('max_entries');
+        var limit = field.data('max_entries'),
+            group = jQuery(this).parents('.um-field-group-body');
 
-		if ( field.find('.um-field-group-body').length > 1 ) {
-		jQuery(this).parents('.um-field-group-body').remove();
-		} else {
-		jQuery(this).parents('.um-field-group-body').hide();
-		}
+        if ( field.find('.um-field-group-body').length > 1 ) {
+            group.remove();
+        } else {
+            group.hide();
+            group.find("input, textarea, select").val("");
+            group.find('.um-field-image').each(function(){
+                var _self = jQuery(this);
+                var src = _self.find('.um-single-image-preview img').attr('src');
+                jQuery('img.cropper-hidden').cropper('destroy');
+                _self.find('.um-single-image-preview img').attr('src', '');
+                _self.find('.um-single-image-preview').hide();
+                _self.find('.ajax-upload-dragdrop').show();
+                _self.find('.um-modal-btn.um-finish-upload').addClass('disabled');
+                _self.find('.um-btn-auto-width').html('Upload');
+                um_modal_responsive();
+                jQuery.ajax({
+                    url: um_scripts.ajaxurl,
+                    type: 'post',
+                    data: {
+                        action: 'ultimatemember_remove_file',
+                        src: src
+                    }
+                });
+            });
+        }
 
 		if ( limit > 0 && field.find('.um-field-group-body').length < limit ) {
 			field.find('.um-field-group-head').removeClass('disabled');
@@ -294,8 +359,17 @@ jQuery(document).ready(function() {
 			jQuery(this).parents('form').submit();
 	});
 
-	
-	var um_select_options_cache = {};
+
+    jQuery('.um-form input[class=um-button][type=submit]').removeAttr('disabled');
+
+    jQuery(document).one('click', '.um-form input[class=um-button][type=submit]', function() {
+        jQuery(this).attr('disabled','disabled');
+        jQuery(this).parents('form').submit();
+
+    });
+
+
+    var um_select_options_cache = {};
 
 	/**
 	 * Find all select fields with parent select fields

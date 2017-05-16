@@ -72,10 +72,57 @@
 				if( !um_user_can( 'can_edit_everyone' ) && isset($fields[$key]['editable']) && !$fields[$key]['editable'] ) continue;
 
 				if ( $fields[$key]['type'] == 'multiselect' ||  $fields[$key]['type'] == 'checkbox' && !isset($args['submitted'][$key]) ) {
-					delete_user_meta( um_user('ID'), $key );
-				}
+                    delete_user_meta( um_user('ID'), $key );
+                } elseif($fields[$key]['type'] == 'group'){
+                    $groupFields = array();
+                    foreach( $fields as $k => $v ) {
+                        if ( isset( $v['in_group'] ) && $v['in_group'] == $key ) {
+                            $groupFields[$k] = $v;
+                        }
+                    }
+                    $group = array();
+                    foreach($groupFields as $k => $v){
+                        $matchedFields = preg_grep("/^" . preg_quote($k) . "\-[0-9]+$/", array_keys($args['submitted']));
+                        foreach ($matchedFields as $mf){
+                            $src = um_is_temp_upload( $args['submitted'][$mf] );
+                            if ( isset( $v['type'] ) && in_array( $v['type'], array('image','file') ) && $src  ) {
+                                $groupFile = array($k => $args['submitted'][$mf]);
+                                $groupFile = apply_filters('um_user_pre_updating_files_array', $groupFile);
+                                if ( is_array( $groupFile ) ) {
+                                    foreach( $groupFile as $image_key => $uri ) {
+                                        $url = $ultimatemember->files->new_user_upload( $ultimatemember->user->id, $src, $key );
+                                        $uploadsUriLength = strlen(um_user_uploads_uri());
+                                        if(substr($url, 0, $uploadsUriLength) === um_user_uploads_uri()) {
+                                            $uri = substr($url, $uploadsUriLength);
+                                        }
+                                        $group[substr($mf, (strlen($k) + 1))][$k] = $uri;
+                                    }
+                                }
+                            } else {
+                                $group[substr($mf, (strlen($k) + 1))][$k] = $args['submitted'][$mf];
+                            }
+                        }
+                    }
 
-				if ( isset( $args['submitted'][ $key ] ) ) {
+                    foreach($group as $k => $v){
+                        if(!strlen(implode($v))){
+                            unset($group[$k]);
+                        }
+                    }
+
+                    $group = array_values($group);
+                    foreach($group as $k => $v){
+                        foreach($v as $field => $field_val){
+                            $group[$k]["{$field}-{$k}"] = $field_val;
+                            unset($group[$k][$field]);
+                        }
+                    }
+
+                    $to_update[$key] = (count($group) > 0) ? serialize(array_values($group)) : "";
+                    continue;
+                }
+
+                if ( isset( $args['submitted'][ $key ] ) ) {
 
 					if ( isset( $fields[$key]['type'] ) && in_array( $fields[$key]['type'], array('image','file') ) && um_is_temp_upload( $args['submitted'][ $key ] )  ) {
 

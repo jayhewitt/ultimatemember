@@ -510,7 +510,7 @@ class UM_Builtin {
 				)
 			),
 			
-			/*'group' => array(
+			'group' => array(
 				'name' => 'Field Group',
 				'col1' => array('_title','_max_entries'),
 				'col2' => array('_label','_public','_roles'),
@@ -525,7 +525,7 @@ class UM_Builtin {
 						'error' => 'You must provide a label'
 					),
 				)
-			),*/
+			),
 		
 		);
 		

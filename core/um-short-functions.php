@@ -552,10 +552,12 @@
 	/***
 	***	@Get filtered meta value after applying hooks
 	***/
-	function um_filtered_value( $key, $data = false ) {
+	function um_filtered_value( $key, $data = false, $value=null ) {
 		global $ultimatemember;
 
-		$value = um_user( $key );
+        if($value===null) {
+            $value = um_user($key);
+        }
 
 		if ( !$data ) {
 			$data = $ultimatemember->builtin->get_specific_field( $key );
@@ -958,7 +960,9 @@
 			$url = add_query_arg('profiletab', 'main', $url );
 		}
 
-		return $url;
+        $url = apply_filters('um_edit_profile_cancel_uri', $url );
+
+        return $url;
 	}
 
 	/***

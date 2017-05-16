@@ -1085,10 +1085,11 @@ class UM_Fields {
 	 * Gets a field in 'input mode'
 	 * @param  string $key  
 	 * @param  array  $data 
-	 * @param  boolean $rule 
+	 * @param  boolean $rule
+     * @param  string $force_field_value
 	 * @return string
 	 */
-	function edit_field( $key, $data, $rule=false ) {
+	function edit_field( $key, $data, $rule=false, $force_field_value=null ) {
 		global $ultimatemember;
 
 		$output = null;
@@ -1168,7 +1169,10 @@ class UM_Fields {
 			}
 		}
 
-		$type = apply_filters("um_hook_for_field_{$type}", $type );
+        $type = apply_filters("um_hook_for_field_{$type}", $type );
+
+        $field_name = $key.$ultimatemember->form->form_suffix;
+        $field_value = ($force_field_value) ? $force_field_value : $this->field_value( $key, $default, $data );
 
 		/* Begin by field type */
 		switch( $type ) {
@@ -1199,16 +1203,13 @@ class UM_Fields {
 
 						}
 
-						$field_name = $key.$ultimatemember->form->form_suffix;
-						$field_value = htmlspecialchars( $this->field_value( $key, $default, $data ) );
-
-						$output .= '<input '.$disabled.' class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $field_value .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                        $output .= '<input '.$disabled.' class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. htmlspecialchars( $field_value ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 						</div>';
                         
                         if( ! empty( $disabled ) ){
-	                        $output .= $this->disabled_hidden_field( $field_name, $field_value ); 
-	                    }
+                            $output .= $this->disabled_hidden_field( $field_name, htmlspecialchars( $field_value ) );
+                        }
 
 						if ( $this->is_error($key) ) {
 							$output .= $this->field_error( $this->show_error($key) );
@@ -1234,16 +1235,13 @@ class UM_Fields {
 
 						}
 
-						$field_name = $key.$ultimatemember->form->form_suffix;
-						$field_value = htmlspecialchars( $this->field_value( $key, $default, $data ) );
-
-						$output .= '<input '.$disabled.' autocomplete="'.$autocomplete.'" class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $field_value .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                        $output .= '<input '.$disabled.' autocomplete="'.$autocomplete.'" class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. htmlspecialchars( $field_value ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 						</div>';
                  		
                  		if( ! empty( $disabled ) ){
-	                        $output .= $this->disabled_hidden_field( $field_name, $field_value ); 
-	                    }
+                            $output .= $this->disabled_hidden_field( $field_name, htmlspecialchars( $field_value ) );
+                        }
 
 						if ( $this->is_error($key) ) {
 							$output .= $this->field_error( $this->show_error($key) );
@@ -1279,7 +1277,7 @@ class UM_Fields {
 							$number_limit .= " max=\"{$max}\" ";
 						}
 
-						$output .= '<input '.$disabled.' class="'.$this->get_class($key, $data).'" type="number" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. htmlspecialchars( $this->field_value( $key, $default, $data ) ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" {$number_limit} />
+                        $output .= '<input '.$disabled.' class="'.$this->get_class($key, $data).'" type="number" name="'.$field_name.'" id="'.$field_name.'" value="'. htmlspecialchars( $this->field_value( $key, $default, $data ) ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" {$number_limit} />
 
 						</div>';
 
@@ -1313,7 +1311,7 @@ class UM_Fields {
 
 							}
 
-							$output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                            $output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 							</div>';
 
@@ -1342,7 +1340,7 @@ class UM_Fields {
 
 								}
 
-								$output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="' . $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                                $output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="' . $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 								</div>';
 
@@ -1376,7 +1374,7 @@ class UM_Fields {
 
 						}
 
-						$output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                        $output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 						</div>';
 
@@ -1403,7 +1401,7 @@ class UM_Fields {
 
 								}
 
-								$output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="' . $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                                $output .= '<input class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="' . $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 								</div>';
 
@@ -1436,7 +1434,7 @@ class UM_Fields {
 
 						}
 
-						$output .= '<input  '.$disabled.'  class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
+                        $output .= '<input  '.$disabled.'  class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'" />
 
 						</div>';
 
@@ -1464,7 +1462,7 @@ class UM_Fields {
 
 						}
 
-						$output .= '<input  '.$disabled.'  class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'"    data-range="'.$range.'" data-years="'.$years.'" data-years_x="'.$years_x.'" data-disabled_weekdays="'.$disabled_weekdays.'" data-date_min="'.$date_min.'" data-date_max="'.$date_max.'" data-format="'.$js_format.'" data-value="'. $this->field_value( $key, $default, $data ) .'" />
+                        $output .= '<input  '.$disabled.'  class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'"    data-range="'.$range.'" data-years="'.$years.'" data-years_x="'.$years_x.'" data-disabled_weekdays="'.$disabled_weekdays.'" data-date_min="'.$date_min.'" data-date_max="'.$date_max.'" data-format="'.$js_format.'" data-value="'. $this->field_value( $key, $default, $data ) .'" />
 
 						</div>';
 
@@ -1492,7 +1490,7 @@ class UM_Fields {
 
 						}
 
-						$output .= '<input  '.$disabled.'  class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'"  data-format="'.$js_format.'" data-intervals="'.$intervals.'" data-value="'. $this->field_value( $key, $default, $data ) .'" />
+                        $output .= '<input  '.$disabled.'  class="'.$this->get_class($key, $data).'" type="'.$input.'" name="'.$field_name.'" id="'.$field_name.'" value="'. $this->field_value( $key, $default, $data ) .'" placeholder="'.$placeholder.'" data-validate="'.$validate.'" data-key="'.$key.'"  data-format="'.$js_format.'" data-intervals="'.$intervals.'" data-value="'. $this->field_value( $key, $default, $data ) .'" />
 
 						</div>';
 
@@ -1517,8 +1515,6 @@ class UM_Fields {
 						}
 
 						$output .= '<div class="um-field-area">';
-						$field_name = $key;
-						$field_value = $this->field_value( $key, $default, $data );
 
 						if ( isset( $data['html'] ) && $data['html'] != 0 && $key != "description" ) {
 
@@ -1550,9 +1546,9 @@ class UM_Fields {
 							$output .=  ob_get_clean();
 
 						}
-						else $output .= '<textarea  '.$disabled.'  style="height: '.$height.';" class="'.$this->get_class($key, $data).'" name="'.$key.'" id="'.$key.'" placeholder="'.$placeholder.'">'.$field_value.'</textarea>';
+                        else $output .= '<textarea  '.$disabled.'  style="height: '.$height.';" class="'.$this->get_class($key, $data).'" name="'.$field_name.'" id="'.$key.'" placeholder="'.$placeholder.'">'.$field_value.'</textarea>';
 
-						$output .= '
+                $output .= '
 						</div>';
 
 						if( ! empty( $disabled ) ){
@@ -1604,13 +1600,11 @@ class UM_Fields {
 
 					if ( in_array( $key, array('profile_photo','cover_photo') )  ) {
 						$field_value = '';
-					} else {
-						$field_value = $this->field_value( $key, $default, $data );
 					}
 
-					$output .= '<input type="hidden" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $field_value . '" />';
+                $output .= '<input type="hidden" name="'.$field_name.'" id="'.$field_name.'" value="'. $field_value . '" />';
 
-					if ( isset( $data['label'] ) ) {
+                if ( isset( $data['label'] ) ) {
 						$output .= $this->field_label($label, $key, $data);
 					}
 
@@ -1618,13 +1612,13 @@ class UM_Fields {
 
 					$output .= '<div class="um-field-area" style="text-align: center">';
 
-					if ( $this->field_value( $key, $default, $data ) ) {
+                if ( $field_value ) {
 
 						if ( !in_array( $key, array('profile_photo','cover_photo') ) ) {
 							if ( isset( $this->set_mode ) && $this->set_mode == 'register' ) {
-								$imgValue = $this->field_value( $key, $default, $data );
+                                $imgValue = $field_value;
 							} else {
-								$imgValue = um_user_uploads_uri() . $this->field_value( $key, $default, $data );
+                                $imgValue = um_user_uploads_uri() . $field_value;
 							}
 							$img = '<img src="' . $imgValue . '" alt="" />';
 						} else {
@@ -1692,9 +1686,9 @@ class UM_Fields {
 			case 'file':
 				$output .= '<div class="um-field' . $classes . '"' . $conditional . ' data-key="'.$key.'">';
 
-					$output .= '<input type="hidden" name="'.$key.$ultimatemember->form->form_suffix.'" id="'.$key.$ultimatemember->form->form_suffix.'" value="'. $this->field_value( $key, $default, $data ) . '" />';
+                $output .= '<input type="hidden" name="'.$field_name.'" id="'.$field_name.'" value="'. $this->field_value( $key, $default, $data ) . '" />';
 
-					if ( isset( $data['label'] ) ) {
+                if ( isset( $data['label'] ) ) {
 					$output .= $this->field_label($label, $key, $data);
 					}
 
@@ -1702,16 +1696,16 @@ class UM_Fields {
 
 					$output .= '<div class="um-field-area" style="text-align: center">';
 
-					if ( $this->field_value( $key, $default, $data ) ) {
+                    if ( $field_value ) {
 
-						$extension = pathinfo( $this->field_value( $key, $default, $data ), PATHINFO_EXTENSION);
+                        $extension = pathinfo( $field_value, PATHINFO_EXTENSION);
 
 						$output .= '<div class="um-single-file-preview show" data-key="'.$key.'">
 										<a href="#" class="cancel"><i class="um-icon-close"></i></a>
 										<div class="um-single-fileinfo">
-											<a href="' . um_user_uploads_uri() . $this->field_value( $key, $default, $data )  . '" target="_blank">
+											<a href="' . um_user_uploads_uri() . $field_value  . '" target="_blank">
 												<span class="icon" style="background:'. $ultimatemember->files->get_fonticon_bg_by_ext( $extension ) . '"><i class="'. $ultimatemember->files->get_fonticon_by_ext( $extension ) .'"></i></span>
-												<span class="filename">' . $this->field_value( $key, $default, $data ) . '</span>
+												<span class="filename">' . $field_value . '</span>
 											</a>
 										</div>
 							</div><a href="#" data-modal="um_upload_single" data-modal-size="'.$modal_size.'" data-modal-copy="1" class="um-button um-btn-auto-width">'. __('Change file','ultimatemember') . '</a>';
@@ -1904,10 +1898,13 @@ class UM_Fields {
 							$option_value = apply_filters('um_field_non_utf8_value',$option_value );
     
 							$output .= '<option value="' . $option_value . '" ';
-							
-							if ( $this->is_selected( $form_key, $option_value, $data ) ) {
+
+                            if ( $force_field_value && $force_field_value==$option_value ) {
 								$output.= 'selected';
 								$field_value = $option_value;
+                            }elseif ( $this->is_selected( $form_key, $option_value, $data ) ) {
+                                $output.= 'selected';
+                                $field_value = $option_value;
 							}else if( ! isset( $options_pair ) && $this->is_selected( $form_key, $v, $data ) ){
 								$output.= 'selected';
 								$field_value = $v;
@@ -2113,9 +2110,12 @@ class UM_Fields {
     
 							$output .= '<input  '.$disabled.' type="radio" name="'.$form_key.'[]" value="'.$option_value.'" ';
 
-							if ( $this->is_radio_checked($key, $option_value, $data) ) {
+                            if($force_field_value && in_array($option_value, (array) $force_field_value)){
 								$output.= 'checked';
 								$field_value[ $key ] = $option_value;
+                            } elseif ( $this->is_radio_checked($key, $option_value, $data) ) {
+                                $output.= 'checked';
+                                $field_value[ $key ] = $option_value;
 							}
 
 							$output .= ' />';
@@ -2249,25 +2249,42 @@ class UM_Fields {
 				break;
 
 			/* Unlimited Group */
-			case 'group':
+            case 'group':
 
-				$fields = $this->get_fields_in_group( $key );
-				if ( !empty( $fields ) ) {
+                $fields = $this->get_fields_in_group( $key );
+                if ( !empty( $fields ) ) {
+                    $output .= '<div class="um-field-group" data-max_entries="' . $max_entries . '">
+				                <div class="um-field-group-body-container">';
+                    $group = @unserialize($this->field_value($key, $default, $data));
+                    if ($group === 'b:0;' || $group !== false) {
+                        $form_suffix = $ultimatemember->form->form_suffix;
+                        foreach ($group as $n => $d) {
+                            $output .= '<div class="um-field-group-body" style="display: block;"><a href="#" class="um-field-group-cancel"><i class="um-icon-close"></i></a>';
+                            $ultimatemember->form->form_suffix = "{$form_suffix}-{$n}";
+                            foreach ($fields as $subkey => $subdata) {
+                                $val = $d["{$subkey}-{$n}"];
+                                if($subdata['type'] == 'image'){
+//                                    $val = um_user_uploads_uri() . $val;
+                                }
+                                $output .= $this->edit_field($subkey, $subdata, 'group', $val);
+                            }
+                            $ultimatemember->form->form_suffix = $form_suffix;
+                            $output .= '</div>';
+                        }
+                    } else {
+                        $output .= '<div class="um-field-group-body"><a href="#" class="um-field-group-cancel"><i class="um-icon-close"></i></a>';
+                        foreach ($fields as $subkey => $subdata) {
+                            $output .= $this->edit_field($subkey, $subdata, "group");
+                        }
+                        $output .= '</div>';
+                    }
 
-				$output .= '<div class="um-field-group" data-max_entries="'.$max_entries.'">
-								<div class="um-field-group-head"><i class="um-icon-plus"></i>'.__($label,UM_TEXTDOMAIN).'</div>';
-					$output .= '<div class="um-field-group-body"><a href="#" class="um-field-group-cancel"><i class="um-icon-close"></i></a>';
+                    $output .= '</div>
+                            <div class="um-field-group-head"><i class="um-icon-plus"></i>' . __($label, UM_TEXTDOMAIN) . '</div>
+                        </div>';
+                }
 
-									foreach($fields as $subkey => $subdata) {
-										$output .= $this->edit_field( $subkey, $subdata, 'group' );
-									}
-
-					$output .= '</div>';
-				$output .= '</div>';
-
-				}
-
-				break;
+                break;
 
 		}
 
@@ -2501,10 +2518,11 @@ class UM_Fields {
 	 * Gets a field in `view mode`
 	 * @param  string  $key  
 	 * @param  array  $data 
-	 * @param  boolean $rule 
+	 * @param  boolean $rule
+     * @param  string $force_field_value
 	 * @return string       
 	 */
-	function view_field( $key, $data, $rule=false ) {
+	function view_field( $key, $data, $rule=false, $force_field_value=null ) {
 		global $ultimatemember;
 
 		$output = null;
@@ -2521,10 +2539,12 @@ class UM_Fields {
 
 		if ( $visibility == 'edit' ) return;
 
+        $field_value = ($force_field_value!==null) ? um_filtered_value($key, $data, $force_field_value) : $this->field_value( $key, $default, $data );
+
 		if ( in_array( $type, array('block','shortcode','spacing','divider','group') ) ) {
 
 		} else {
-			if ( ! $this->field_value( $key, $default, $data ) ) return;
+            if ( ! $field_value ) return;
 		}
 
 		if ( !um_can_view_field( $data ) ) return;
@@ -2549,8 +2569,8 @@ class UM_Fields {
 
 							$output .= $this->field_label( $data['label'], $key, $data);
 						}
-						
-						$res = $this->field_value( $key, $default, $data );
+
+                        $res = $field_value;
 
 						if( ! empty( $res ) ){
 							$res = stripslashes( $res );
@@ -2610,13 +2630,31 @@ class UM_Fields {
 
 						$output .= '<div class="um-field-area">';
 						$output .= '<div class="um-field-value">
-										<div class="um-rating-readonly um-raty" id="'.$key.'" data-key="'.$key.'" data-number="'.$data['number'].'" data-score="' .  $this->field_value( $key, $default, $data ) . '"></div>
+										<div class="um-rating-readonly um-raty" id="'.$key.'" data-key="'.$key.'" data-number="'.$data['number'].'" data-score="' .  $field_value . '"></div>
 									</div>';
 						$output .= '</div>';
 
 						$output .= '</div>';
 
-				break;
+                break;
+
+            /* Field Group */
+            case 'group':
+                $output .= '<div class="um-field' . $classes . '"' . $conditional . ' data-key="'.$key.'">';
+                $group = unserialize($field_value);
+                foreach( $group as $row_id => $row_fields ) {
+                    $output .= '<div class="panel">';
+                    foreach( $row_fields as $key => $value ) {
+                        $key = preg_replace('/\-\d+$/', '', $key);
+                        $data = $this->get_field($key);
+                        $data = apply_filters("um_view_field_output_" . $data['type'], $data);
+                        $output .= $this->view_field($key, $data, $type, $value);
+                    }
+                    $output .= '<div style="clear:both"></div>';
+                    $output .= '</div>';
+                }
+                $output .= '</div>';
+                break;
 
 		}
 
@@ -2904,4 +2942,19 @@ class UM_Fields {
 
 	
 
+}
+
+add_filter('um_view_field_output_group', 'um_view_field_output_group' );
+function um_view_field_output_group( $data ) {
+    global $ultimatemember;
+
+    $key = $data['metakey'];
+
+    if (is_array($data)) {
+        $data = $ultimatemember->fields->get_field($key);
+    }
+    if(!$ultimatemember->fields->field_value( $key, $data['default'], $data )){
+        return false;
+    }
+    return $data;
 }
