@@ -2641,6 +2641,7 @@ class UM_Fields {
             /* Field Group */
             case 'group':
                 $output .= '<div class="um-field' . $classes . '"' . $conditional . ' data-key="'.$key.'">';
+                $output .= '<div class="um-row-heading">' . $data['label'] . '</div>';
                 $group = unserialize($field_value);
                 foreach( $group as $row_id => $row_fields ) {
                     $output .= '<div class="panel">';
